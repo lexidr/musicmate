@@ -154,10 +154,7 @@ function HomePage() {
               <div className="stack">
                 <h3>Музыкальный профиль</h3>
                 {profile.status === 'ready' ? (
-                  <div className="stats-row">
-                    <div><strong>{profile.artists_count}</strong><span>исполнителей</span></div>
-                    <div><strong>{profile.tracks_count}</strong><span>треков</span></div>
-                  </div>
+                  <p>Ваши любимые исполнители и треки уже загружены.</p>
                 ) : (
                   <p>Получим любимых исполнителей и треки из Spotify.</p>
                 )}
@@ -179,7 +176,6 @@ function HomePage() {
               <div className="stack">
                 <h3>Сравнить с другом</h3>
                 <p>Создание ссылки станет доступно после музыкального профиля.</p>
-                <span className="coming-soon coming-soon--dark">Скоро</span>
               </div>
             </div>
           </Card>
@@ -223,8 +219,8 @@ function ProfilePage() {
           <p>Исполнители и треки, которые вы слушаете чаще всего.</p>
         </section>
 
-        <ProfileList title="Любимые исполнители" items={profile.artists} />
-        <ProfileList title="Любимые треки" items={profile.tracks} showArtist />
+        <ProfileList title="Любимые исполнители" items={profile.artists.slice(0, 15)} />
+        <ProfileList title="Любимые треки" items={profile.tracks.slice(0, 15)} showArtist />
       </main>
     </div>
   )
@@ -248,7 +244,17 @@ function ProfileList({ title, items, showArtist = false }: { title: string; item
             key={`${item.name}-${index}`}
           >
             <span className="music-item__number">{index + 1}</span>
-            {item.image_url ? <img src={item.image_url} alt="" /> : <span className="music-item__image" />}
+            <span className="music-item__image">
+              <span>{item.name.charAt(0).toUpperCase()}</span>
+              {item.image_url && (
+                <img
+                  src={item.image_url}
+                  alt=""
+                  referrerPolicy="no-referrer"
+                  onError={(event) => { event.currentTarget.style.display = 'none' }}
+                />
+              )}
+            </span>
             <span className="music-item__text">
               <strong>{item.name}</strong>
               {showArtist && item.artist_name && <small>{item.artist_name}</small>}

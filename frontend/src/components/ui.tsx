@@ -17,7 +17,19 @@ export function Chip({ children }: { children: ReactNode }) {
 }
 
 export function Avatar({ src, name }: { src?: string | null; name: string }) {
-  if (src) return <img className="avatar" src={src} alt={`Аватар ${name}`} />
+  if (src) {
+    return (
+      <div className="avatar avatar--fallback avatar--image">
+        <span>{name.charAt(0).toUpperCase()}</span>
+        <img
+          src={src}
+          alt={`Аватар ${name}`}
+          referrerPolicy="no-referrer"
+          onError={(event) => { event.currentTarget.style.display = 'none' }}
+        />
+      </div>
+    )
+  }
 
   return <div className="avatar avatar--fallback">{name.charAt(0).toUpperCase()}</div>
 }
