@@ -247,6 +247,35 @@ p {
   color: var(--text-muted-dark);
 }
 
+.stats-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-block: 1px solid var(--border-light);
+}
+
+.stats-row div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1);
+  padding: var(--s3) 0;
+}
+
+.stats-row div + div {
+  padding-left: var(--s3);
+  border-left: 1px solid var(--border-light);
+}
+
+.stats-row strong {
+  font-size: 32px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.stats-row span {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
 .home-footer {
   padding: 0 20px var(--s5);
   text-align: center;
@@ -255,6 +284,89 @@ p {
 .home-footer p {
   font-size: 12px;
 }
+
+.profile-page {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100svh;
+  margin: 0 auto;
+  background: var(--bg-light);
+}
+
+.topbar__title {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.profile-content {
+  padding-bottom: var(--s5);
+}
+
+.profile-heading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+  padding: var(--s5) 20px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.profile-section {
+  padding: var(--s5) 20px 0;
+}
+
+.section-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s3);
+  margin-bottom: var(--s3);
+}
+
+.section-title h2 { font-size: 22px; }
+.section-title span { color: var(--text-muted); font-size: 13px; }
+
+.music-list { border-top: 1px solid var(--border-light); }
+
+.music-item {
+  display: grid;
+  grid-template-columns: 22px 48px 1fr 12px;
+  gap: 12px;
+  align-items: center;
+  min-width: 0;
+  padding: 12px 0;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-light);
+  text-decoration: none;
+}
+
+.music-item__number,
+.music-item__arrow { color: var(--text-muted); font-size: 13px; }
+
+.music-item img,
+.music-item__image {
+  width: 48px;
+  height: 48px;
+  background: var(--border-light);
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.music-item__text {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.music-item__text strong,
+.music-item__text small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.music-item__text strong { font-size: 14px; font-weight: 500; }
+.music-item__text small { color: var(--text-muted); font-size: 12px; }
 
 .ui-kit-section {
   display: flex;

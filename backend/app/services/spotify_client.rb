@@ -41,6 +41,24 @@ class SpotifyClient
     send_request(uri, request)
   end
 
+  def top_items(access_token, type)
+    query = URI.encode_www_form(time_range: "medium_term", limit: 50)
+    uri = URI("#{API_URL}/me/top/#{type}?#{query}")
+    request = Net::HTTP::Get.new(uri)
+    request["Authorization"] = "Bearer #{access_token}"
+
+    send_request(uri, request).fetch("items")
+  end
+
+  def refresh_token(refresh_token)
+    uri = URI(TOKEN_URL)
+    request = Net::HTTP::Post.new(uri)
+    request.basic_auth(client_id, client_secret)
+    request.set_form_data(grant_type: "refresh_token", refresh_token: refresh_token)
+
+    send_request(uri, request)
+  end
+
   private
 
   def send_request(uri, request)

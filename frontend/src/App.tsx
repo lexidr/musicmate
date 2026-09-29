@@ -10,6 +10,21 @@ type User = {
   avatar_url: string | null
 }
 
+type MusicProfile = {
+  status: 'empty' | 'ready' | 'failed'
+  artists_count: number
+  tracks_count: number
+  artists: ProfileItem[]
+  tracks: ProfileItem[]
+}
+
+type ProfileItem = {
+  name: string
+  artist_name: string | null
+  spotify_url: string | null
+  image_url: string | null
+}
+
 function LoginPage() {
   useEffect(() => {
     if (getToken()) window.location.replace('/home')
@@ -56,11 +71,19 @@ function AuthCallbackPage() {
 
 function HomePage() {
   const [user, setUser] = useState<User | null>(null)
+  const [profile, setProfile] = useState<MusicProfile | null>(null)
   const [error, setError] = useState('')
+  const [syncing, setSyncing] = useState(false)
 
   const loadUser = useCallback(() => {
-    apiRequest<User>('/me')
-      .then(setUser)
+    Promise.all([
+      apiRequest<User>('/me'),
+      apiRequest<MusicProfile>('/music-profile'),
+    ])
+      .then(([userData, profileData]) => {
+        setUser(userData)
+        setProfile(profileData)
+      })
       .catch(() => setError('Не удалось загрузить профиль'))
   }, [])
 
@@ -77,6 +100,20 @@ function HomePage() {
     }
   }
 
+  const syncProfile = async () => {
+    setSyncing(true)
+    setError('')
+
+    try {
+      const data = await apiRequest<MusicProfile>('/music-profile/sync', { method: 'POST' })
+      setProfile(data)
+    } catch {
+      setError('Не удалось получить данные из Spotify')
+    } finally {
+      setSyncing(false)
+    }
+  }
+
   if (error) {
     return (
       <main className="page">
@@ -88,7 +125,7 @@ function HomePage() {
     )
   }
 
-  if (!user) return <main className="page"><div className="page-center"><Loader /></div></main>
+  if (!user || !profile) return <main className="page"><div className="page-center"><Loader /></div></main>
 
   return (
     <div className="home-page">
@@ -116,8 +153,22 @@ function HomePage() {
               <span className="action-card__number">01</span>
               <div className="stack">
                 <h3>Музыкальный профиль</h3>
-                <p>Здесь появятся ваши любимые исполнители и треки.</p>
-                <span className="coming-soon">Следующий этап</span>
+                {profile.status === 'ready' ? (
+                  <div className="stats-row">
+                    <div><strong>{profile.artists_count}</strong><span>исполнителей</span></div>
+                    <div><strong>{profile.tracks_count}</strong><span>треков</span></div>
+                  </div>
+                ) : (
+                  <p>Получим любимых исполнителей и треки из Spotify.</p>
+                )}
+                <Button onClick={syncProfile} disabled={syncing}>
+                  {syncing ? 'Загружаем...' : profile.status === 'ready' ? 'Обновить профиль' : 'Создать профиль'}
+                </Button>
+                {profile.status === 'ready' && (
+                  <Button variant="outline" onClick={() => window.location.href = '/profile'}>
+                    Открыть профиль
+                  </Button>
+                )}
               </div>
             </div>
           </Card>
@@ -142,10 +193,79 @@ function HomePage() {
   )
 }
 
+function ProfilePage() {
+  const [profile, setProfile] = useState<MusicProfile | null>(null)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    apiRequest<MusicProfile>('/music-profile')
+      .then(setProfile)
+      .catch(() => setError('Не удалось загрузить музыкальный профиль'))
+  }, [])
+
+  if (error) {
+    return <main className="page"><div className="page-center"><ErrorMessage>{error}</ErrorMessage></div></main>
+  }
+
+  if (!profile) return <main className="page"><div className="page-center"><Loader /></div></main>
+
+  return (
+    <div className="profile-page">
+      <header className="topbar">
+        <a className="brand" href="/home"><span>‹</span> Назад</a>
+        <span className="topbar__title">Мой профиль</span>
+      </header>
+
+      <main className="profile-content">
+        <section className="profile-heading">
+          <Chip>Spotify</Chip>
+          <h1>Моя музыка</h1>
+          <p>Исполнители и треки, которые вы слушаете чаще всего.</p>
+        </section>
+
+        <ProfileList title="Любимые исполнители" items={profile.artists} />
+        <ProfileList title="Любимые треки" items={profile.tracks} showArtist />
+      </main>
+    </div>
+  )
+}
+
+function ProfileList({ title, items, showArtist = false }: { title: string; items: ProfileItem[]; showArtist?: boolean }) {
+  return (
+    <section className="profile-section">
+      <div className="section-title">
+        <h2>{title}</h2>
+        <span>{items.length}</span>
+      </div>
+
+      <div className="music-list">
+        {items.map((item, index) => (
+          <a
+            className="music-item"
+            href={item.spotify_url || undefined}
+            target={item.spotify_url ? '_blank' : undefined}
+            rel="noreferrer"
+            key={`${item.name}-${index}`}
+          >
+            <span className="music-item__number">{index + 1}</span>
+            {item.image_url ? <img src={item.image_url} alt="" /> : <span className="music-item__image" />}
+            <span className="music-item__text">
+              <strong>{item.name}</strong>
+              {showArtist && item.artist_name && <small>{item.artist_name}</small>}
+            </span>
+            <span className="music-item__arrow">›</span>
+          </a>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 function App() {
   if (window.location.pathname === '/ui-kit') return <UiKitPage />
   if (window.location.pathname === '/auth/callback') return <AuthCallbackPage />
   if (window.location.pathname === '/home') return <HomePage />
+  if (window.location.pathname === '/profile') return <ProfilePage />
   return <LoginPage />
 }
 

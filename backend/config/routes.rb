@@ -5,6 +5,8 @@ Rails.application.routes.draw do
       get "auth/spotify/callback", to: "auth#callback"
       get "me", to: "me#show"
       post "logout", to: "auth#logout"
+      get "music-profile", to: "music_profiles#show"
+      post "music-profile/sync", to: "music_profiles#sync"
     end
   end
 
