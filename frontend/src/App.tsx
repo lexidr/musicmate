@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { API_URL, apiRequest, clearToken, getToken, saveToken } from './api'
+import { Avatar, Button, Card, Chip, ErrorMessage, Loader } from './components/ui'
+import { UiKitPage } from './UiKitPage'
 
 type User = {
   id: number
@@ -18,10 +20,15 @@ function LoginPage() {
   }
 
   return (
-    <main>
-      <h1>musicmate</h1>
-      <p>Сравни музыкальный вкус с другом</p>
-      <button onClick={login}>Войти через Spotify</button>
+    <main className="page">
+      <div className="page-center">
+        <section className="hero-panel stack">
+          <Chip>Музыка объединяет</Chip>
+          <h1>musicmate</h1>
+          <p>Сравни музыкальный вкус с другом</p>
+          <Button variant="light" onClick={login}>Войти через Spotify</Button>
+        </section>
+      </div>
     </main>
   )
 }
@@ -38,7 +45,13 @@ function AuthCallbackPage() {
     window.location.replace('/home')
   }, [hasError, token])
 
-  return <main><p>{hasError ? 'Не удалось войти через Spotify' : 'Выполняется вход...'}</p></main>
+  return (
+    <main className="page">
+      <div className="page-center">
+        {hasError ? <ErrorMessage>Не удалось войти через Spotify</ErrorMessage> : <Loader text="Выполняется вход..." />}
+      </div>
+    </main>
+  )
 }
 
 function HomePage() {
@@ -60,20 +73,32 @@ function HomePage() {
     }
   }
 
-  if (error) return <main><p>{error}</p></main>
-  if (!user) return <main><p>Загрузка...</p></main>
+  if (error) return <main className="page"><div className="page-center"><ErrorMessage>{error}</ErrorMessage></div></main>
+  if (!user) return <main className="page"><div className="page-center"><Loader /></div></main>
 
   return (
-    <main>
-      {user.avatar_url && <img className="avatar" src={user.avatar_url} alt="" />}
-      <h1>{user.name}</h1>
-      {user.email && <p>{user.email}</p>}
-      <button className="secondary" onClick={logout}>Выйти</button>
+    <main className="page">
+      <div className="page-center">
+        <Card>
+          <div className="stack">
+            <Chip>Профиль</Chip>
+            <div className="profile-row">
+              <Avatar src={user.avatar_url} name={user.name} />
+              <div>
+                <h3>{user.name}</h3>
+                {user.email && <p>{user.email}</p>}
+              </div>
+            </div>
+            <Button variant="outline" onClick={logout}>Выйти</Button>
+          </div>
+        </Card>
+      </div>
     </main>
   )
 }
 
 function App() {
+  if (window.location.pathname === '/ui-kit') return <UiKitPage />
   if (window.location.pathname === '/auth/callback') return <AuthCallbackPage />
   if (window.location.pathname === '/home') return <HomePage />
   return <LoginPage />
