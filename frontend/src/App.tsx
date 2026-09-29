@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { API_URL, apiRequest, clearToken, getToken, saveToken } from './api'
 import { Avatar, Button, Card, Chip, ErrorMessage, Loader } from './components/ui'
 import { UiKitPage } from './UiKitPage'
@@ -58,11 +58,15 @@ function HomePage() {
   const [user, setUser] = useState<User | null>(null)
   const [error, setError] = useState('')
 
-  useEffect(() => {
+  const loadUser = useCallback(() => {
     apiRequest<User>('/me')
       .then(setUser)
       .catch(() => setError('Не удалось загрузить профиль'))
   }, [])
+
+  useEffect(() => {
+    loadUser()
+  }, [loadUser])
 
   const logout = async () => {
     try {
@@ -73,27 +77,68 @@ function HomePage() {
     }
   }
 
-  if (error) return <main className="page"><div className="page-center"><ErrorMessage>{error}</ErrorMessage></div></main>
+  if (error) {
+    return (
+      <main className="page">
+        <div className="page-center">
+          <ErrorMessage>{error}</ErrorMessage>
+          <Button onClick={() => { setError(''); loadUser() }}>Попробовать снова</Button>
+        </div>
+      </main>
+    )
+  }
+
   if (!user) return <main className="page"><div className="page-center"><Loader /></div></main>
 
   return (
-    <main className="page">
-      <div className="page-center">
-        <Card>
-          <div className="stack">
-            <Chip>Профиль</Chip>
-            <div className="profile-row">
-              <Avatar src={user.avatar_url} name={user.name} />
-              <div>
-                <h3>{user.name}</h3>
-                {user.email && <p>{user.email}</p>}
+    <div className="home-page">
+      <header className="topbar">
+        <a className="brand" href="/home"><span>*</span> musicmate</a>
+        <Button variant="text" onClick={logout}>Выйти</Button>
+      </header>
+
+      <main className="home-content">
+        <section className="home-hero">
+          <Chip>Ваш профиль</Chip>
+          <div className="profile-row">
+            <Avatar src={user.avatar_url} name={user.name} />
+            <div>
+              <p className="eyebrow">Добро пожаловать</p>
+              <h1>{user.name}</h1>
+            </div>
+          </div>
+          <p>Создайте музыкальный профиль, чтобы сравнить свой вкус с друзьями.</p>
+        </section>
+
+        <section className="home-section">
+          <Card>
+            <div className="action-card">
+              <span className="action-card__number">01</span>
+              <div className="stack">
+                <h3>Музыкальный профиль</h3>
+                <p>Здесь появятся ваши любимые исполнители и треки.</p>
+                <span className="coming-soon">Следующий этап</span>
               </div>
             </div>
-            <Button variant="outline" onClick={logout}>Выйти</Button>
-          </div>
-        </Card>
-      </div>
-    </main>
+          </Card>
+
+          <Card dark>
+            <div className="action-card">
+              <span className="action-card__number">02</span>
+              <div className="stack">
+                <h3>Сравнить с другом</h3>
+                <p>Создание ссылки станет доступно после музыкального профиля.</p>
+                <span className="coming-soon coming-soon--dark">Скоро</span>
+              </div>
+            </div>
+          </Card>
+        </section>
+
+        <footer className="home-footer">
+          <p>{user.email}</p>
+        </footer>
+      </main>
+    </div>
   )
 }
 
