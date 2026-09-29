@@ -1,4 +1,6 @@
 class ApplicationController < ActionController::API
+  include ActionController::Cookies
+
   rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
   rescue_from ActiveRecord::RecordInvalid, with: :render_invalid_record
 
@@ -16,6 +18,17 @@ class ApplicationController < ActionController::API
       }
     }, status: status
   end
+
+  def authenticate_user!
+    token = request.headers["Authorization"]&.split&.last
+    @current_user = JwtService.user_from(token)
+
+    return if @current_user
+
+    render_error("UNAUTHORIZED", "Нужно войти в аккаунт", status: :unauthorized)
+  end
+
+  attr_reader :current_user
 
   def render_not_found
     render_error("NOT_FOUND", "Запись не найдена", status: :not_found)
