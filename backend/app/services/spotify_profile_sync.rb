@@ -2,7 +2,7 @@ class SpotifyProfileSync
   def initialize(user)
     @user = user
     @connection = user.spotify_connection
-    @profile = user.music_profile || user.create_music_profile!
+    @profile = user.music_profile_or_create!
   end
 
   def call
@@ -15,12 +15,12 @@ class SpotifyProfileSync
       profile.profile_items.delete_all
       save_artists(artists)
       save_tracks(tracks)
-      profile.update!(status: "ready", artists_count: artists.size, tracks_count: tracks.size)
+      profile.mark_as_ready!(artists_count: artists.size, tracks_count: tracks.size)
     end
 
     profile
   rescue SpotifyClient::Error
-    profile.update!(status: "failed")
+    profile.mark_as_failed!
     raise
   end
 
@@ -29,7 +29,7 @@ class SpotifyProfileSync
   attr_reader :connection, :profile
 
   def access_token
-    return connection.access_token if connection.token_expires_at > 1.minute.from_now
+    return connection.access_token unless connection.token_needs_refresh?
 
     tokens = SpotifyClient.new.refresh_token(connection.refresh_token)
     connection.update!(

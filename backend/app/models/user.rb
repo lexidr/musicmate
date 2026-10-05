@@ -4,4 +4,8 @@ class User < ApplicationRecord
 
   validates :name, presence: true
   validates :spotify_user_id, presence: true, uniqueness: true
+
+  def music_profile_or_create!
+    music_profile || create_music_profile!
+  end
 end

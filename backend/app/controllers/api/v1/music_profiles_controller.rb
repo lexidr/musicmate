@@ -4,7 +4,7 @@ module Api
       before_action :authenticate_user!
 
       def show
-        profile = current_user.music_profile || current_user.create_music_profile!
+        profile = current_user.music_profile_or_create!
         render_success(profile_data(profile))
       end
 
@@ -28,7 +28,9 @@ module Api
       end
 
       def items_data(profile, type)
-        profile.profile_items.where(item_type: type).order(weight: :desc).map do |item|
+        items = type == "artist" ? profile.artists : profile.tracks
+
+        items.map do |item|
           {
             name: item.name,
             artist_name: item.artist_name,
