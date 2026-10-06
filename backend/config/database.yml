@@ -9,7 +9,7 @@ development:
 
 test:
   <<: *default
-  database: musicmate_test
+  url: <%= ENV.fetch("TEST_DATABASE_URL", ENV.fetch("DATABASE_URL", "postgresql://localhost/musicmate_development").sub("musicmate_development", "musicmate_test")) %>
 
 production:
   <<: *default

@@ -2,5 +2,18 @@
 # for example lib/tasks/capistrano.rake, and they will automatically be available to Rake.
 
 require_relative "config/application"
+require "rbconfig"
 
 Rails.application.load_tasks
+
+desc "Run model tests"
+task :test do
+  success = system(
+    { "RAILS_ENV" => "test" },
+    RbConfig.ruby,
+    "-Itest",
+    "test/run_all.rb"
+  )
+
+  abort "Tests failed" unless success
+end

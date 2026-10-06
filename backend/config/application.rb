@@ -12,6 +12,8 @@ require "action_controller/railtie"
 # require "action_text/engine"
 require "action_view/railtie"
 # require "action_cable/engine"
+# Tests use Minitest directly because rails/test_unit/railtie is unstable
+# with the Windows Ruby version used by this project.
 # require "rails/test_unit/railtie"
 
 # Require the gems listed in Gemfile, including any gems
