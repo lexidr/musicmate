@@ -7,6 +7,9 @@ Rails.application.routes.draw do
       post "logout", to: "auth#logout"
       get "music-profile", to: "music_profiles#show"
       post "music-profile/sync", to: "music_profiles#sync"
+      post "comparisons", to: "comparisons#create"
+      get "comparisons/:token", to: "comparisons#show"
+      post "comparisons/:token/join", to: "comparisons#join"
     end
   end
 

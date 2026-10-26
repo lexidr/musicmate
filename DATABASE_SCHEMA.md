@@ -1,11 +1,12 @@
 # Схема базы данных MusicMate
 
-В проекте используется PostgreSQL. База данных содержит четыре основные таблицы:
+В проекте используется PostgreSQL. База данных содержит пять основных таблиц:
 
 - `users` — пользователи приложения;
 - `spotify_connections` — данные подключения пользователей к Spotify;
 - `music_profiles` — музыкальные профили пользователей;
 - `profile_items` — любимые исполнители и треки.
+- `comparisons` — сравнения музыкальных профилей двух пользователей.
 
 ## ER-диаграмма
 
@@ -14,6 +15,8 @@ erDiagram
     USERS ||--|| SPOTIFY_CONNECTIONS : "имеет подключение"
     USERS ||--|| MUSIC_PROFILES : "имеет профиль"
     MUSIC_PROFILES ||--o{ PROFILE_ITEMS : "содержит"
+    USERS ||--o{ COMPARISONS : "создаёт"
+    USERS ||--o{ COMPARISONS : "присоединяется"
 
     USERS {
         bigint id PK
@@ -57,6 +60,17 @@ erDiagram
         string image_url
         integer weight
         jsonb metadata
+        datetime created_at
+        datetime updated_at
+    }
+
+    COMPARISONS {
+        bigint id PK
+        bigint creator_id FK
+        bigint guest_id FK
+        string invite_token UK
+        string status
+        integer score
         datetime created_at
         datetime updated_at
     }
@@ -140,6 +154,23 @@ erDiagram
 
 Составной индекс по `music_profile_id` и `item_type` ускоряет получение всех исполнителей или всех треков конкретного профиля.
 
+## Таблица `comparisons`
+
+Хранит приглашения и результаты сравнения двух пользователей.
+
+| Поле | Тип | Назначение |
+|---|---|---|
+| `id` | bigint | Уникальный идентификатор сравнения |
+| `creator_id` | bigint | Пользователь, создавший приглашение |
+| `guest_id` | bigint | Пользователь, который присоединился; сначала отсутствует |
+| `invite_token` | string | Уникальный токен ссылки-приглашения |
+| `status` | string | Состояние: `waiting` или `completed` |
+| `score` | integer | Процент музыкальной совместимости от 0 до 100 |
+| `created_at` | datetime | Дата создания сравнения |
+| `updated_at` | datetime | Дата последнего обновления |
+
+`creator_id` и `guest_id` ссылаются на таблицу `users`. Один пользователь может участвовать в нескольких сравнениях. `invite_token` имеет уникальный индекс.
+
 ## Связи между таблицами
 
 ### Пользователь и подключение Spotify
@@ -167,4 +198,13 @@ music_profiles.id = profile_items.music_profile_id
 Связь «один ко многим». Один профиль может содержать много исполнителей и треков.
 
 При удалении пользователя Rails также удаляет его подключение Spotify и музыкальный профиль. При удалении музыкального профиля удаляются связанные с ним элементы.
+
+### Пользователи и сравнение
+
+```text
+users.id = comparisons.creator_id
+users.id = comparisons.guest_id
+```
+
+Один пользователь создаёт приглашение, а второй присоединяется к нему. Пока друг не присоединился, `guest_id` остаётся пустым, а статус равен `waiting`.
 

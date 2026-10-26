@@ -10,9 +10,22 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_29_000004) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_26_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "comparisons", force: :cascade do |t|
+    t.bigint "creator_id", null: false
+    t.bigint "guest_id"
+    t.string "invite_token", null: false
+    t.string "status", default: "waiting", null: false
+    t.integer "score"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["creator_id"], name: "index_comparisons_on_creator_id"
+    t.index ["guest_id"], name: "index_comparisons_on_guest_id"
+    t.index ["invite_token"], name: "index_comparisons_on_invite_token", unique: true
+  end
 
   create_table "music_profiles", force: :cascade do |t|
     t.bigint "user_id", null: false
@@ -61,6 +74,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_29_000004) do
     t.index ["spotify_user_id"], name: "index_users_on_spotify_user_id", unique: true
   end
 
+  add_foreign_key "comparisons", "users", column: "creator_id"
+  add_foreign_key "comparisons", "users", column: "guest_id"
   add_foreign_key "music_profiles", "users"
   add_foreign_key "profile_items", "music_profiles"
   add_foreign_key "spotify_connections", "users"

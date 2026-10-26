@@ -6,21 +6,28 @@ require "active_support/test_case"
 
 class ActiveSupport::TestCase
   teardown do
+    Comparison.delete_all
     ProfileItem.delete_all
     MusicProfile.delete_all
     SpotifyConnection.delete_all
     User.delete_all
   end
 
-  def create_user
+  def create_user(name: "Test User", spotify_user_id: "test-spotify-user")
     User.create!(
-      name: "Test User",
-      spotify_user_id: "test-spotify-user"
+      name: name,
+      spotify_user_id: spotify_user_id
     )
   end
 
   def create_profile(user = create_user)
     user.create_music_profile!
+  end
+
+  def create_ready_profile(user)
+    profile = create_profile(user)
+    profile.mark_as_ready!(artists_count: 15, tracks_count: 15)
+    profile
   end
 
   def create_profile_item(profile:, type:, name:, weight:)

@@ -430,6 +430,132 @@ p {
 .music-item__text strong { font-size: 14px; font-weight: 500; }
 .music-item__text small { color: var(--text-muted); font-size: 12px; }
 
+.empty-list {
+  padding: var(--s4) 0;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 14px;
+}
+
+.comparison-page {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100svh;
+  margin: 0 auto;
+  background: var(--bg-light);
+}
+
+.comparison-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s4);
+  padding: var(--s5) 20px;
+}
+
+.comparison-heading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+
+.comparison-heading .chip {
+  margin-bottom: var(--s2);
+}
+
+.invite-label {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.invite-input {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px;
+  color: var(--text-primary);
+  background: #f5f5f5;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  font-size: 13px;
+}
+
+.join-card {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  margin-bottom: var(--s4);
+}
+
+.join-card span {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.comparison-result {
+  padding-bottom: var(--s5);
+}
+
+.score-panel {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s5) 20px var(--s6);
+  color: var(--text-on-dark);
+  background: var(--bg-dark);
+  text-align: center;
+}
+
+.score-panel::before {
+  position: absolute;
+  inset: 20% -20% -40%;
+  content: '';
+  background: radial-gradient(ellipse, rgba(0, 200, 150, 0.35), transparent 65%);
+  filter: blur(35px);
+}
+
+.score-panel > * {
+  position: relative;
+}
+
+.score-panel p {
+  color: var(--text-muted-dark);
+}
+
+.comparison-users {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: var(--s3) 0 var(--s2);
+}
+
+.comparison-users .avatar {
+  width: 56px;
+  height: 56px;
+}
+
+.comparison-users > span {
+  color: var(--accent-glow);
+  font-size: 24px;
+}
+
+.score {
+  color: var(--accent-glow);
+  font-size: 72px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.score-panel h1 {
+  max-width: 320px;
+  font-size: 28px;
+}
+
+.comparison-actions {
+  padding: var(--s5) 20px 0;
+}
+
 .ui-kit-section {
   display: flex;
   flex-direction: column;
