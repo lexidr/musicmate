@@ -3,6 +3,7 @@ ENV["RAILS_ENV"] ||= "test"
 require_relative "../config/environment"
 require "minitest/autorun"
 require "active_support/test_case"
+require "action_dispatch/testing/integration"
 
 class ActiveSupport::TestCase
   teardown do
@@ -38,5 +39,19 @@ class ActiveSupport::TestCase
       spotify_id: "#{type}-#{name.parameterize}",
       weight: weight
     )
+  end
+end
+
+class ActionDispatch::IntegrationTest
+  def auth_headers(user)
+    { "Authorization" => "Bearer #{JwtService.encode(user)}" }
+  end
+
+  def response_data
+    JSON.parse(response.body).fetch("data")
+  end
+
+  def response_error
+    JSON.parse(response.body).fetch("error")
   end
 end
