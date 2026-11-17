@@ -1,4 +1,5 @@
 export const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:3000/api/v1'
+export const CABLE_URL = import.meta.env.VITE_CABLE_URL || API_URL.replace(/^http/, 'ws').replace(/\/api\/v1$/, '/cable')
 const TOKEN_KEY = 'musicmate_token'
 
 export function getToken() {

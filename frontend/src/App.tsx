@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { API_URL, apiRequest, clearToken, getToken, saveToken } from './api'
+import { createConsumer } from '@rails/actioncable'
+import { API_URL, CABLE_URL, apiRequest, clearToken, getToken, saveToken } from './api'
 import { Avatar, Button, Card, Chip, ErrorMessage, Loader } from './components/ui'
 import { UiKitPage } from './UiKitPage'
 
@@ -340,6 +341,26 @@ function ComparisonPage({ token }: { token: string }) {
     loadComparison()
   }, [authorized, loadComparison, token])
 
+  useEffect(() => {
+    const authToken = getToken()
+    if (!authToken || !comparison?.is_creator || comparison.status !== 'waiting') return
+
+    const consumer = createConsumer(`${CABLE_URL}?token=${encodeURIComponent(authToken)}`)
+    const subscription = consumer.subscriptions.create(
+      { channel: 'ComparisonChannel', token },
+      {
+        received: (message: { event: string }) => {
+          if (message.event === 'comparison_completed') loadComparison()
+        },
+      },
+    )
+
+    return () => {
+      subscription.unsubscribe()
+      consumer.disconnect()
+    }
+  }, [comparison?.is_creator, comparison?.status, loadComparison, token])
+
   const login = () => {
     localStorage.setItem(PENDING_COMPARISON_KEY, `/compare/${token}`)
     window.location.href = `${API_URL}/auth/spotify`
@@ -411,7 +432,7 @@ function ComparisonPage({ token }: { token: string }) {
           <section className="comparison-heading">
             <Chip>{comparison.is_creator ? 'Ждём друга' : 'Приглашение'}</Chip>
             <h1>{comparison.is_creator ? 'Ссылка готова' : `${comparison.creator.name} приглашает вас`}</h1>
-            <p>{comparison.is_creator ? 'Отправьте эту ссылку другу. После его входа обновите страницу.' : 'Присоединитесь, чтобы узнать вашу музыкальную совместимость.'}</p>
+            <p>{comparison.is_creator ? 'Отправьте эту ссылку другу. Результат появится автоматически после его входа.' : 'Присоединитесь, чтобы узнать вашу музыкальную совместимость.'}</p>
           </section>
 
           {error && <ErrorMessage>{error}</ErrorMessage>}
@@ -422,7 +443,6 @@ function ComparisonPage({ token }: { token: string }) {
                 <label className="invite-label" htmlFor="invite-link">Ссылка-приглашение</label>
                 <input id="invite-link" className="invite-input" value={comparison.invite_url} readOnly />
                 <Button onClick={copyInvite}>{copied ? 'Ссылка скопирована' : 'Скопировать ссылку'}</Button>
-                <Button variant="outline" onClick={loadComparison}>Обновить страницу</Button>
               </div>
             </Card>
           ) : (

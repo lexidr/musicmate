@@ -21,6 +21,7 @@ module Api
 
       def join
         comparison.join!(current_user)
+        ComparisonChannel.broadcast_to(comparison, { event: "comparison_completed" })
         render_success(comparison_data(comparison))
       rescue Comparison::Error => error
         render_error("COMPARISON_ERROR", error.message, status: :unprocessable_entity)

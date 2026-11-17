@@ -1,6 +1,9 @@
 require "test_helper"
+require "action_cable/test_helper"
 
 class ComparisonsHappyPathTest < ActionDispatch::IntegrationTest
+  include ActionCable::TestHelper
+
   setup do
     @creator = create_user(name: "Creator", spotify_user_id: "creator")
     @guest = create_user(name: "Guest", spotify_user_id: "guest")
@@ -32,7 +35,9 @@ class ComparisonsHappyPathTest < ActionDispatch::IntegrationTest
   test "guest joins and receives compatibility result" do
     comparison = Comparison.create_for!(@creator)
 
-    post "/api/v1/comparisons/#{comparison.invite_token}/join", headers: auth_headers(@guest)
+    assert_broadcast_on(ComparisonChannel.broadcasting_for(comparison), event: "comparison_completed") do
+      post "/api/v1/comparisons/#{comparison.invite_token}/join", headers: auth_headers(@guest)
+    end
 
     assert_response :success
     result = response_data
