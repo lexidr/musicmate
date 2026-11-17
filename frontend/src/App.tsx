@@ -181,7 +181,7 @@ function HomePage() {
               <h1>{user.name}</h1>
             </div>
           </div>
-          <p>Создайте музыкальный профиль, чтобы сравнить свой вкус с друзьями.</p>
+          <p>Ваш музыкальный профиль создаётся автоматически на основе данных Spotify.</p>
         </section>
 
         <section className="home-section">
@@ -193,10 +193,10 @@ function HomePage() {
                 {profile.status === 'ready' ? (
                   <p>Ваши любимые исполнители и треки уже загружены.</p>
                 ) : (
-                  <p>Получим любимых исполнителей и треки из Spotify.</p>
+                  <p>Не удалось загрузить данные автоматически. Попробуйте обновить профиль.</p>
                 )}
                 <Button onClick={syncProfile} disabled={syncing}>
-                  {syncing ? 'Загружаем...' : profile.status === 'ready' ? 'Обновить профиль' : 'Создать профиль'}
+                  {syncing ? 'Загружаем...' : 'Обновить профиль'}
                 </Button>
                 {profile.status === 'ready' && (
                   <Button variant="outline" onClick={() => window.location.href = '/profile'}>
