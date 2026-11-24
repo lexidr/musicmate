@@ -104,7 +104,6 @@ function HomePage() {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<MusicProfile | null>(null)
   const [error, setError] = useState('')
-  const [syncing, setSyncing] = useState(false)
   const [creatingComparison, setCreatingComparison] = useState(false)
 
   const loadUser = useCallback(() => {
@@ -129,20 +128,6 @@ function HomePage() {
     } finally {
       clearToken()
       window.location.replace('/')
-    }
-  }
-
-  const syncProfile = async () => {
-    setSyncing(true)
-    setError('')
-
-    try {
-      const data = await apiRequest<MusicProfile>('/music-profile/sync', { method: 'POST' })
-      setProfile(data)
-    } catch {
-      setError('Не удалось получить данные из Spotify')
-    } finally {
-      setSyncing(false)
     }
   }
 
@@ -199,13 +184,10 @@ function HomePage() {
               <div className="stack">
                 <h3>Музыкальный профиль</h3>
                 {profile.status === 'ready' ? (
-                  <p>Ваши любимые исполнители и треки уже загружены.</p>
+                  <p>Ваши любимые исполнители и треки обновляются автоматически при входе через Spotify.</p>
                 ) : (
-                  <p>Не удалось загрузить данные автоматически. Попробуйте обновить профиль.</p>
+                  <p>Не удалось загрузить данные из Spotify. Выйдите и войдите в аккаунт ещё раз.</p>
                 )}
-                <Button onClick={syncProfile} disabled={syncing}>
-                  {syncing ? 'Загружаем...' : 'Обновить профиль'}
-                </Button>
                 {profile.status === 'ready' && (
                   <Button variant="outline" onClick={() => window.location.href = '/profile'}>
                     Открыть профиль

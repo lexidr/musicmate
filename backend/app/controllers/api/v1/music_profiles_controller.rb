@@ -8,13 +8,6 @@ module Api
         render_success(profile_data(profile))
       end
 
-      def sync
-        profile = SpotifyProfileSync.new(current_user).call
-        render_success(profile_data(profile))
-      rescue SpotifyClient::Error => error
-        render_error("SPOTIFY_ERROR", error.message, status: :bad_gateway)
-      end
-
       private
 
       def profile_data(profile)

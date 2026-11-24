@@ -8,7 +8,6 @@ Rails.application.routes.draw do
       get "me", to: "me#show"
       post "logout", to: "auth#logout"
       get "music-profile", to: "music_profiles#show"
-      post "music-profile/sync", to: "music_profiles#sync"
       get "comparisons", to: "comparisons#index"
       post "comparisons", to: "comparisons#create"
       get "comparisons/:token", to: "comparisons#show"

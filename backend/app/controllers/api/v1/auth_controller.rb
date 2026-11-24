@@ -45,14 +45,12 @@ module Api
         connection.scopes = tokens["scope"]
         connection.save!
 
-        music_profile = user.music_profile_or_create!
+        user.music_profile_or_create!
 
-        if music_profile.status != "ready"
-          begin
-            SpotifyProfileSync.new(user).call
-          rescue SpotifyClient::Error => error
-            Rails.logger.error("Spotify profile sync error: #{error.message}")
-          end
+        begin
+          SpotifyProfileSync.new(user).call
+        rescue SpotifyClient::Error => error
+          Rails.logger.error("Spotify profile sync error: #{error.message}")
         end
 
         redirect_to_frontend(token: JwtService.encode(user))
