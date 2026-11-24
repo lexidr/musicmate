@@ -45,6 +45,13 @@ type Comparison = {
   can_join: boolean
 }
 
+type ComparisonHistoryItem = {
+  invite_token: string
+  score: number
+  other_user: ComparisonUser
+  created_at: string
+}
+
 const PENDING_COMPARISON_KEY = 'musicmate_pending_comparison'
 
 function LoginPage() {
@@ -220,11 +227,81 @@ function HomePage() {
               </div>
             </div>
           </Card>
+
+          <Card>
+            <div className="action-card">
+              <span className="action-card__number">03</span>
+              <div className="stack">
+                <h3>История сравнений</h3>
+                <p>Посмотрите результаты прошлых сравнений с друзьями.</p>
+                <Button variant="outline" onClick={() => window.location.href = '/history'}>
+                  Открыть историю
+                </Button>
+              </div>
+            </div>
+          </Card>
         </section>
 
         <footer className="home-footer">
           <p>{user.email}</p>
         </footer>
+      </main>
+    </div>
+  )
+}
+
+function HistoryPage() {
+  const [items, setItems] = useState<ComparisonHistoryItem[] | null>(null)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    apiRequest<ComparisonHistoryItem[]>('/comparisons')
+      .then(setItems)
+      .catch(() => setError('Не удалось загрузить историю сравнений'))
+  }, [])
+
+  if (error) {
+    return <main className="page"><div className="page-center"><ErrorMessage>{error}</ErrorMessage></div></main>
+  }
+
+  if (!items) return <main className="page"><div className="page-center"><Loader /></div></main>
+
+  return (
+    <div className="history-page">
+      <header className="topbar">
+        <a className="brand" href="/home"><span>‹</span> Назад</a>
+        <span className="topbar__title">История</span>
+      </header>
+
+      <main className="history-content">
+        <section className="history-heading">
+          <Chip>Сравнения</Chip>
+          <h1>История</h1>
+          <p>Ваши завершённые сравнения с друзьями.</p>
+        </section>
+
+        {items.length === 0 ? (
+          <Card>
+            <div className="stack">
+              <h3>История пока пуста</h3>
+              <p>Создайте приглашение и сравните музыку с другом.</p>
+              <Button onClick={() => window.location.href = '/home'}>На главную</Button>
+            </div>
+          </Card>
+        ) : (
+          <div className="history-list">
+            {items.map((item) => (
+              <a className="history-item" href={`/compare/${item.invite_token}`} key={item.invite_token}>
+                <Avatar src={item.other_user.avatar_url} name={item.other_user.name} />
+                <span className="history-item__text">
+                  <strong>{item.other_user.name}</strong>
+                  <small>{new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(item.created_at))}</small>
+                </span>
+                <strong className="history-item__score">{item.score}%</strong>
+              </a>
+            ))}
+          </div>
+        )}
       </main>
     </div>
   )
@@ -497,6 +574,7 @@ function App() {
   if (window.location.pathname === '/auth/callback') return <AuthCallbackPage />
   if (window.location.pathname === '/home') return <HomePage />
   if (window.location.pathname === '/profile') return <ProfilePage />
+  if (window.location.pathname === '/history') return <HistoryPage />
   const comparisonMatch = window.location.pathname.match(/^\/compare\/([^/]+)$/)
   if (comparisonMatch) return <ComparisonPage token={comparisonMatch[1]} />
   return <LoginPage />

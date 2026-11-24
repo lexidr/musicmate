@@ -18,4 +18,11 @@ class User < ApplicationRecord
   def music_profile_or_create!
     music_profile || create_music_profile!
   end
+
+  def comparison_history
+    Comparison
+      .where(status: "completed")
+      .where("creator_id = :id OR guest_id = :id", id: id)
+      .order(created_at: :desc)
+  end
 end

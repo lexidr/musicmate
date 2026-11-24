@@ -4,6 +4,11 @@ module Api
       before_action :authenticate_user!
       before_action :find_comparison, only: %i[show join]
 
+      def index
+        comparisons = current_user.comparison_history.includes(:creator, :guest)
+        render_success(comparisons.map { |comparison| history_data(comparison) })
+      end
+
       def create
         comparison = Comparison.create_for!(current_user)
         render_success(comparison_data(comparison), status: :created)
@@ -59,6 +64,17 @@ module Api
           id: user.id,
           name: user.name,
           avatar_url: user.avatar_url
+        }
+      end
+
+      def history_data(comparison)
+        other_user = comparison.creator == current_user ? comparison.guest : comparison.creator
+
+        {
+          invite_token: comparison.invite_token,
+          score: comparison.score,
+          other_user: user_data(other_user),
+          created_at: comparison.created_at
         }
       end
 
